@@ -1,11 +1,8 @@
 package com.company.springboot.controllers;
 
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -154,25 +151,22 @@ public class ClienteRestController {
 	@DeleteMapping("/clientes/{id}")
 	public ResponseEntity<?> delete(@PathVariable Long id) {
 		Map<String, Object> response = new HashMap<>();
+		
 		try {
 			Cliente cliente = clienteService.findById(id);
 			String nombreFotoAnterior = cliente.getFoto();
 			
-			if(nombreFotoAnterior != null && nombreFotoAnterior.length() > 0) {
-				Path rutaFotoAnterior = Paths.get("uploads").resolve(nombreFotoAnterior).toAbsolutePath();
-				File archivoFotoAnterior = rutaFotoAnterior.toFile();
-				if(archivoFotoAnterior.exists() && archivoFotoAnterior.canRead()) {
-					archivoFotoAnterior.delete();
-				}
-			}
+			uploadService.eliminar(nombreFotoAnterior);
 			
-			clienteService.delete(id);
-		}catch(DataAccessException e) {
-			response.put("mensaje", "Error al borrar el cliente en la base de datos");
+		    clienteService.delete(id);
+		} catch (DataAccessException e) {
+			response.put("mensaje", "Error al eliminar el cliente de la base de datos");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		response.put("mensaje", "El cliente a sido elliminado con exito");
+		
+		response.put("mensaje", "El cliente eliminado con éxito!");
+		
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
 	}
 	
